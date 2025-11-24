@@ -1,0 +1,126 @@
+# números para el documento ####
+path <- "C:/Users/jose.lobo/OneDrive/Trabajo/Humboldt/wd/encuesta_prestadores/" 
+
+load(paste0(path,"datos/", "251020_prestadores_encuestaCVC_labels.RData"))
+
+cols_servicios <- c(
+  "¿Presta servicios de transporte?",
+  "¿Presta servicios de operadora o agencia de turismo?",
+  "¿Presta servicios de guianza turística?",
+  "¿Presta el servicio de alojamiento u hospedaje?",
+  "¿Presta servicios como venta o elaboración de artesanías?"
+)
+i[, nro_serv := rowSums(.SD == "sí"), .SDcols = cols_servicios]
+
+tabyl(i$`¿Presta el servicio de alojamiento u hospedaje?`)
+tabyl(i$`¿Presta servicios de operadora o agencia de turismo?`)
+tabyl(i$`¿Presta servicios de guianza turística?`)
+tabyl(i$`¿Presta servicios de transporte?`)
+tabyl(i$`¿Presta servicios como venta o elaboración de artesanías?`)
+
+mytab_col(i[`Fuentes distintas de encuesta CVC (primarias y secundarias)`==T],Municipio,`¿Presta el servicio de alojamiento u hospedaje?`)
+mytab_col(i[`Fuentes distintas de encuesta CVC (primarias y secundarias)`==T],Municipio,`¿Presta servicios de transporte?`)
+mytab_col(i[`Fuentes distintas de encuesta CVC (primarias y secundarias)`==T],Municipio,`¿Presta servicios de operadora o agencia de turismo?`)
+mytab_col(i[`Fuentes distintas de encuesta CVC (primarias y secundarias)`==T],Municipio,`¿Presta servicios como venta o elaboración de artesanías?`)
+mytab_col(i[`Fuentes distintas de encuesta CVC (primarias y secundarias)`==T],Municipio,`¿Presta servicios de guianza turística?`)
+
+mytab_col(i,Municipio,EncuestaCVC)
+mytab_col(i[EncuestaCVC==T],Municipio,`Fuentes distintas de encuesta CVC (primarias y secundarias)`)
+mytab_col(i,EncuestaCVC,`Fuentes distintas de encuesta CVC (primarias y secundarias)`)
+
+mytab_col(i[EncuestaCVC==T],Municipio,`¿Presta el servicio de alojamiento u hospedaje?`)
+mytab_col(i[EncuestaCVC==T],Municipio,`¿Presta servicios de operadora o agencia de turismo?`)
+mytab_col(i[EncuestaCVC==T],Municipio,`¿Presta servicios de transporte?`)
+mytab_col(i[EncuestaCVC==T],Municipio,`¿Presta servicios como venta o elaboración de artesanías?`)
+mytab_col(i[EncuestaCVC==T],Municipio,`¿Presta servicios de guianza turística?`)
+
+mytab_col(i,Municipio,`¿Presta el servicio de alojamiento u hospedaje?`)
+mytab_col(i,Municipio,`¿Presta servicios de operadora o agencia de turismo?`)
+mytab_col(i,Municipio,`¿Presta servicios de transporte?`)
+mytab_col(i,Municipio,`¿Presta servicios como venta o elaboración de artesanías?`)
+mytab_col(i,Municipio,`¿Presta servicios de guianza turística?`)
+
+mytab_col(i,RNT,`¿Presta servicios de operadora o agencia de turismo?`)
+mytab_col(i,RNT,`¿Presta servicios de transporte?`)
+mytab_col(i,RNT,`¿Presta el servicio de alojamiento u hospedaje?`)
+
+mytab_row(i,`¿Presta servicios de operadora o agencia de turismo?`,`¿Presta el servicio de alojamiento u hospedaje?`)
+mytab_row(i,`¿Presta servicios de operadora o agencia de turismo?`,`¿Presta servicios de transporte?`)
+
+mytab_col(i[EncuestaCVC==T],RNT,`¿Presta servicios de operadora o agencia de turismo?`)
+
+# Crear la variable nro_serv contando los "sí" ####
+mytab_col(i,nro_serv,`¿Presta servicios de transporte?`)
+mytab_col(i[nro_serv!=1],nro_serv,`¿Presta servicios de transporte?`)
+mytab_col(i,`¿Presta servicios de operadora o agencia de turismo?`,`¿Presta servicios de transporte?`)
+mytab_col(i,`¿Presta el servicio de alojamiento u hospedaje?`,`¿Presta servicios de transporte?`)
+
+# número de servicios
+mytab_col(i,nro_serv,`¿Presta el servicio de alojamiento u hospedaje?`)
+mytab_col(i,`¿Presta el servicio de alojamiento u hospedaje?`,`¿Presta servicios de guianza turística?`)
+mytab_col(i,nro_serv,`¿Presta servicios como venta o elaboración de artesanías?`)
+mytab_col(i[nro_serv!=1],`¿Presta servicios como venta o elaboración de artesanías?`,`¿Presta servicios de transporte?`)
+
+# tabla de transporte ####
+b[, autos:=ifelse(grepl("automoviles_o_camionetas", trns_tipo), 1, 0)]
+b[, bus  :=ifelse(grepl("bus_o_buseta"            , trns_tipo), 1, 0)]
+mytab_col(b[serv_transporte=='s'],autos,bus)
+
+b[autos==1 & bus==0 & serv_transporte=='s', trns_tipo_rc:="Automóviles o camionetas"]
+b[autos==1 & bus==1 & serv_transporte=='s', trns_tipo_rc:="Automóviles o camionetas y bus o busetas"]
+b[autos==0 & bus==1 & serv_transporte=='s', trns_tipo_rc:="Bus o busetas"]
+b[autos==0 & bus==0 & serv_transporte=='s', trns_tipo_rc:="Otros"]
+
+b[, trns_capacidad_label := fcase(
+  trns_capacidad == "31_o_m_s_de_31_personas", "31 o más personas",
+  trns_capacidad == "entre_11_30_personas",    "Entre 11 y 30 personas",
+  trns_capacidad == "entre_6_10_personas",     "Entre 6 y 10 personas",
+  trns_capacidad == "menos_5_personas",        "Menos de 5 personas",
+  default = NA
+)]
+
+freq_dt <- b[ObjectID %in% c5[,`Id interno de la encuesta en formato numérico`], .N, by = .(trns_capacidad_label, trns_tipo_rc)]
+freq_dt <- freq_dt[order(trns_tipo_rc,trns_capacidad_label)]
+
+mytab_col(b[ObjectID %in% c5[,`Id interno de la encuesta en formato numérico`]],trns_tipo,trns_capacidad)
+
+# comparar no cobertura de tablas entre sí ####
+View(i[EncuestaCVC==T & !(`Id interno de la encuesta en formato numérico` %in% c5$`Id interno de la encuesta en formato numérico`) & `¿Presta servicios de transporte?`=='sí'])
+View(i[EncuestaCVC==T & !(`Id interno de la encuesta en formato numérico` %in% c4$`Id interno de la encuesta en formato numérico`) & `¿Presta servicios como venta o elaboración de artesanías?`=='sí'])
+
+# gráfico de hospedaje ####
+freq_dt2 <- b[ObjectID %in% c3[,`Id interno de la encuesta en formato numérico`], .(ObjectID,mpio_final,size,hos_capac)]
+freq_dt2 <- freq_dt2[ObjectID!=58, .(
+  prom_size = mean(size, na.rm = TRUE),
+  prom_hos_capac = mean(hos_capac, na.rm = TRUE),
+  count = .N
+), by = mpio_final]
+
+freq_dt2 <- freq_dt2[, lapply(.SD, function(x) {
+  if (is.numeric(x)) format(x, decimal.mark = ",") else x
+})]
+
+View(freq_dt2)
+
+# cifras artesanías ####
+View(c4[, lapply(.SD, sum), .SDcols = 20:65])
+
+# guianza ####
+View(
+  c6[, .(
+    prom_capacidad = format(mean(Capacidad, na.rm = TRUE), decimal.mark = ","),
+    n = .N
+  ),
+  by = Municipio
+  ]
+)
+
+# atractivos o recursos turísticos ####
+path <- "C:/Users/jose.lobo/OneDrive/Trabajo/Humboldt/wd/encuesta_prestadores/" 
+
+load(paste0(path,"datos/", "251121_recursos_encuestaCVC_labels.RData"))
+
+nrow(atributos)
+
+
+
